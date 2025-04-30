@@ -10,7 +10,8 @@ const authsroute = require("./routes/authRoutes");
 const classroute = require("./routes/classRoutes");
 const postroute = require("./routes/postRoutes");
 const courseroute = require("./routes/courseRoutes");
-const cors = require('cors');
+const eventroute = require("./routes/eventRoutes");
+const cors = require("cors");
 
 // Load environment variables from .env file
 dotenv.config({ path: ".env" });
@@ -33,8 +34,6 @@ if (process.env.NODE_ENV === "development") {
   console.log(`Mode: ${process.env.NODE_ENV}`);
 }
 
-// Set API version with fallback if not defined in .env
-const apiVersion = process.env.API_V || "v1"; // Default to "v1" if API_V is not set
 
 // Mount routes with dynamic API version
 app.use(`/user`, usersroute);
@@ -43,6 +42,7 @@ app.use(`/class`, classroute);
 app.use(`/post`, postroute);
 app.use(`/course`, courseroute);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(`/event`, eventroute);
 
 // Root endpoint for testing
 app.all("/", (req, res) => {

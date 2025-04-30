@@ -17,25 +17,22 @@ exports.getOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
 
-    // Find the document (post) that is not soft-deleted
+    // Find the document that is not soft-deleted
     const document = await Model.findOne({ _id: id, isDeleted: false });
 
     if (!document) {
       return next(new ApiError(`No document found with ID ${id}`, 404));
     }
 
-    // Manually filter out soft-deleted comments
-    const filteredComments = document.comments.filter(
-      (comment) => !comment.deletedAt
-    );
+    // Convert to plain object to modify safely
+    const data = document.toObject();
 
-    // Clone the document and replace comments with filtered ones
-    const responseData = {
-      ...document.toObject(),
-      comments: filteredComments,
-    };
+    // If the model has a `comments` field, filter soft-deleted ones
+    if (Array.isArray(data.comments)) {
+      data.comments = data.comments.filter((comment) => !comment.deletedAt);
+    }
 
-    res.status(200).json({ data: responseData });
+    res.status(200).json({ data });
   });
 
 // Get Many (excluding soft-deleted)
