@@ -1,0 +1,73 @@
+const express = require("express");
+const dotenv = require("dotenv");
+const morgan = require("morgan");
+const ApiError = require("./utils/ApiError");
+const globelError = require("./middlewares/errorMiddlware");
+const dbconnect = require("./config/database");
+const path = require("path");
+const usersroute = require("./routes/userRoutes");
+const authsroute = require("./routes/authRoutes");
+const classroute = require("./routes/classRoutes");
+const postroute = require("./routes/postRoutes");
+const courseroute = require("./routes/courseRoutes");
+const cors = require('cors');
+
+// Load environment variables from .env file
+dotenv.config({ path: ".env" });
+
+// Create the Express app instance
+const app = express();
+
+// Use CORS middleware
+app.use(cors());
+
+// Connect to the database
+dbconnect();
+
+// Middleware - parsing JSON requests
+app.use(express.json());
+
+// Use Morgan for logging in development mode
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+  console.log(`Mode: ${process.env.NODE_ENV}`);
+}
+
+// Set API version with fallback if not defined in .env
+const apiVersion = process.env.API_V || "v1"; // Default to "v1" if API_V is not set
+
+// Mount routes with dynamic API version
+app.use(`/user`, usersroute);
+app.use(`/auth`, authsroute);
+app.use(`/class`, classroute);
+app.use(`/post`, postroute);
+app.use(`/course`, courseroute);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Root endpoint for testing
+app.all("/", (req, res) => {
+  res.send("Welcome to the API!");
+});
+
+// Global error handling middleware
+app.use(globelError);
+
+// Start the server
+const server = app.listen(process.env.PORT || 3000, "192.168.100.106", () => {
+  console.log(`Server running on 192.168.100.106:3000`);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  console.error(`Unhandled Rejection Error: ${err.name} | ${err.message}`);
+  server.close(() => {
+    console.error("Shutting down server...");
+    process.exit(1);
+  });
+});
+
+// Handle uncaught exceptions (unhandled errors)
+process.on("uncaughtException", (err) => {
+  console.error(`Uncaught Exception Error: ${err.name} | ${err.message}`);
+  process.exit(1);
+});
