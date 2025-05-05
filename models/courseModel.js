@@ -23,6 +23,11 @@ const courseSchema = new mongoose.Schema({
     ref: "User",
     required: [true, "Course must belong to a user"],
   },
+  class :{
+    type: mongoose.Schema.ObjectId,
+    ref: "Class",
+    required: [true, "Course must belong to a class"],
+  },
   isDeleted: {
     type: Boolean,
     default: false,
