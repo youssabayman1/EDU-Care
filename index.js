@@ -16,7 +16,6 @@ const graderoute = require("./routes/gradeRoutes ");
 const submitRouter = require("./routes/submitRoute");
 const cartRoute = require("./routes/cartRoutes");
 
-
 // Load environment variables from .env file
 dotenv.config({ path: ".env" });
 
@@ -50,9 +49,6 @@ app.use(`/grade`, graderoute);
 app.use(`/submit`, submitRouter);
 app.use(`/cart`, cartRoute);
 
-
-
-
 // Root endpoint for testing
 app.all("/", (req, res) => {
   res.send("Welcome to the API!");
@@ -62,9 +58,10 @@ app.all("/", (req, res) => {
 app.use(globelError);
 
 // Start the server
-const server = app.listen(process.env.PORT || 3000, "192.168.100.106", () => {
-  console.log(`Server running on 192.168.100.106:3000`);
+const server = app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on http://localhost:${server.address().port}`);
 });
+
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
