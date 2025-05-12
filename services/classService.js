@@ -109,3 +109,13 @@ exports.joinClassRoom = asyncHandler(async (req, res, next) => {
       next(error);
     }
   };
+
+
+
+  exports.getDeletedClasses = asyncHandler(async (req, res, next) => {
+    const deletedClasses = await ClassModel.find({ isDeleted: true }).select('-__v');
+    res.status(200).json({
+      success: true,
+      data: deletedClasses,
+    });
+  });

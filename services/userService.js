@@ -13,7 +13,7 @@ const bcrypt = require("bcrypt");
 //@desc get list of brands
 //@route get/ /api/v1/brands
 //@access public
-exports.getUsers = factory.getMany(userModel);
+exports.getUsers = factory.getMany(userModel,'User',true);
 
 //desc     get sepsfic brand  by id
 //@route    get /v1/brands/:id
@@ -32,3 +32,29 @@ exports.updateUser = factory.updateOne(userModel);
 
 
 exports.deleteUser = factory.deleteOne(userModel);
+
+
+
+
+// controllers/userController.js
+exports.getAllUsersWithClassStatus = asyncHandler(async (req, res, next) => {
+    const { classId } = req.params;
+    
+    // Get all active users
+    const users = await userModel.find({ isDeleted: false })
+      .select('firstName lastName email role image classes')
+      .lean(); // Convert to plain JS object
+  
+    // Transform data to include class membership status
+    const usersWithStatus = users.map(user => ({
+      ...user,
+      isInClass: user.classes.some(c => c.classId.toString() === classId),
+      classes: undefined // Remove the classes array from response
+    }));
+  
+    res.status(200).json({
+      status: 'success',
+      results: usersWithStatus.length,
+      data: usersWithStatus
+    });
+  });

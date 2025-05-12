@@ -46,11 +46,8 @@ exports.processPostUploads = asyncHandler(async (req, res, next) => {
 
   next(); // Move on to the next middleware
 });
-exports.getAllSubmit  = factory.getMany(submitModel);
-exports.getSubmit  = factory.getOne(submitModel);
-exports.createSubmit  = factory.createOne(submitModel);
-exports.updateSubmit  = factory.updateOne(submitModel);
-exports.deleteSubmit  = factory.deleteOne(submitModel);
-
-
-
+exports.getAllSubmit = factory.getMany(submitModel);
+exports.getSubmit = factory.getOne(submitModel);
+exports.createSubmit = factory.createOne(submitModel);
+exports.updateSubmit = factory.updateOne(submitModel);
+exports.deleteSubmit = factory.deleteOne(submitModel);

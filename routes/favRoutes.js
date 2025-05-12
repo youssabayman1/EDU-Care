@@ -1,10 +1,14 @@
 const express = require("express");
 const {
-  addToCart,
-  createcart,
-  getUserCart,
-  removeSingleCourseFromCart
-} = require("../services/cartService");
+  createfav,
+  getAllfav,
+  getfav,
+  updatefav,
+  deletefav,
+  getUserFav,
+
+
+} = require("../services/favService");
 const authroute = require("../services/authService");
 const router = express.Router();
 
@@ -15,20 +19,20 @@ router
   .post(
     authroute.protect,
     authroute.allowedTo("teacher", "institution", "student"),
-    createcart
+    createfav
   ); // POST /courses
 
 router.get(
   "/:userId",
   authroute.protect,
   authroute.allowedTo("teacher", "institution", "student"),
-  getUserCart
+  getUserFav
 );
 
-router.post(
+/* router.post(
   "/remove",
   authroute.protect,
   authroute.allowedTo("teacher", "institution", "student"),
   removeSingleCourseFromCart
-);
+); */
 module.exports = router;

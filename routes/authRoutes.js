@@ -12,14 +12,11 @@ const {
   forgotPassword,
   virfyPassResetCode,
   resetPassword,
+  protect,
+  requestPasswordChange,
+  confirmPasswordChange
 } = require("../services/authService");
-/* const {
-  createAdmin,
-  logInAdmin,
-  forgotPasswordAdmin,
-  allowedToAdmin,
-  protectAdmin,
-} = require("../services/authServiceAdmin"); */
+
 const router = express.Router();
 const upload = multer(); // memory storage
 // Routes
@@ -27,10 +24,13 @@ const upload = multer(); // memory storage
 router.route("/signup").post( multerUpload().single("profileImg"),signupValidator, signUp);
 router.route("/login").post( upload.none(), loginInValidator, logIn);
 router.route("/forgetPassword").post(forgotPassword);
-/* router.route("/loginAdmin").post(logInAdmin); */
-/* router.route("/createAdmin").post(protectAdmin, allowedToAdmin, createAdmin); */
-/* router.route("/forgetPassword").post(forgotPasswordAdmin); */
+
 router.route("/virfiyRestPass").post(virfyPassResetCode);
 router.route("/resetPassword").patch(resetPassword);
+
+
+router.put('/requestPasswordChange', protect, requestPasswordChange);
+router.get('/confirmPasswordChange/:token', confirmPasswordChange);
+
 
 module.exports = router;

@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema(
     passwordResetCode: String,
     passwordResetExpire: Date,
     passwordResetVervied: Boolean,
+    passwordChangeToken: String,
+    passwordChangeExpire: Date,
+    pendingNewPassword: String,
+
     role: {
       type: String,
       enum: ["institution", "teacher", "student"],

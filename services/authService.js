@@ -218,3 +218,76 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   const token = createToken(user._id);
   res.status(200).json({ token });
 });
+
+
+exports.requestPasswordChange = asyncHandler(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return next(new ApiError("Both current and new passwords are required", 400));
+  }
+
+  const user = await User.findById(req.user._id).select('+password');
+  if (!user) return next(new ApiError("User not found", 404));
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) return next(new ApiError("Current password is incorrect", 401));
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  user.passwordChangeToken = hashedToken;
+  user.passwordChangeExpire = Date.now() + 10 * 60 * 1000;
+  user.pendingNewPassword = await bcrypt.hash(newPassword, 6);
+  await user.save();
+
+  const confirmURL = `${req.protocol}://${req.get('host')}/api/v1/auth/confirmPasswordChange/${token}`;
+  const message = `Hi ${user.firstName},\n\nClick below to confirm your password change:\n${confirmURL}\n\nThis link expires in 10 minutes.`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Confirm Your Password Change",
+      message,
+    });
+
+    res.status(200).json({ message: 'Confirmation link sent to your email.' });
+  } catch (err) {
+    user.passwordChangeToken = undefined;
+    user.passwordChangeExpire = undefined;
+    user.pendingNewPassword = undefined;
+    await user.save();
+
+    return next(new ApiError("Failed to send email. Try again later.", 500));
+  }
+});
+
+
+
+
+
+
+exports.confirmPasswordChange = asyncHandler(async (req, res, next) => {
+  const { token } = req.params;
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    passwordChangeToken: hashedToken,
+    passwordChangeExpire: { $gt: Date.now() },
+  });
+
+  if (!user || !user.pendingNewPassword) {
+    return next(new ApiError('Invalid or expired token', 400));
+  }
+
+  // Finalize password change
+  user.password = user.pendingNewPassword;
+  user.passwordChangeToken = undefined;
+  user.passwordChangeExpire = undefined;
+  user.pendingNewPassword = undefined;
+  await user.save();
+
+  const newToken = createToken(user._id);
+
+  res.status(200).json({ message: 'Password successfully changed', token: newToken });
+});

@@ -39,24 +39,36 @@ class ApiFeatures {
 
   search(modelName) {
     if (this.queryString.keyword) {
-      console.log("keyword");
-    }
-    if (this.queryString.keyword) {
+      console.log("Searching for:", this.queryString.keyword);
+  
       let query = {};
-      if (modelName === "product") {
-        query.$or = [
-          { title: { $regex: this.queryString.keyword, $options: "i" } },
-          { description: { $regex: this.queryString.keyword, $options: "i" } },
-        ];
+      
+      // Dynamically search for the keyword across all string fields
+      if (modelName) {
+        // If a specific model is passed, we can construct queries dynamically
+        // For any model, if the keyword is provided, we create a generic query
+        query.$or = [];
+  
+        // Assuming all fields that can be searched for are string fields.
+        // Extend this logic based on your model schema.
+        const searchableFields = ['name', 'title', 'description']; // Add more fields here as needed
+  
+        searchableFields.forEach(field => {
+          query.$or.push({
+            [field]: { $regex: this.queryString.keyword, $options: "i" },
+          });
+        });
       } else {
+        // If no model is provided, we default to searching all fields
         query = { name: { $regex: this.queryString.keyword, $options: "i" } };
       }
-
+  
+      // Apply the query to the mongoose query object
       this.mongooseQuery = this.mongooseQuery.find(query);
     }
     return this;
   }
-
+  
   paginate(countDocuments) {
     const page = this.queryString.page * 1 || 1;
     const limit = this.queryString.limit * 1 || 50;
