@@ -1,3 +1,5 @@
-node_modules/
-
-config.enf
+node_modules/
+
+config.enf
+config.bat
+.env
