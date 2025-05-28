@@ -25,6 +25,17 @@ exports.createOne = (Model) =>
       req.body.class = req.params.classId;
     }
 
+
+    // Automatically add class creator to allowedUsers
+if (Model.modelName === "Class") {
+  if (!req.body.allowedUsers) {
+    req.body.allowedUsers = [];
+  }
+  // Add current user if not already included
+  if (!req.body.allowedUsers.includes(req.user._id)) {
+    req.body.allowedUsers.push(req.user._id);
+  }
+}
     // ------------------ CART LOGIC ------------------
     if (Model.modelName === "Cart") {
       const courseIds = req.body.courseId;
